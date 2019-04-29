@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.util.List;
 
 import static com.github.izerui.learn.response.Response.error;
 import static com.github.izerui.learn.response.Response.success;
@@ -85,6 +84,33 @@ public class LearnController {
         }
         Object answer = network.getAnswer(opCookie, itemBankId, questionId);
         return success(answer);
+    }
+
+    // 保存答案
+    @PutMapping("/saveHomeWork")
+    public Response saveHomeWork(@RequestParam("answerSheet") String answerSheet,
+                                 @RequestParam("homeworkID") String homeworkID,
+                                 @RequestParam("homeworkAnswerId") String homeworkAnswerId,
+                                 @SessionAttribute(value = "opCookie", required = false) String opCookie) throws IOException {
+        if (StringUtils.isEmpty(opCookie)) {
+            return error("用户未登录");
+        }
+        network.saveHomeWork(opCookie, homeworkID, homeworkAnswerId, answerSheet);
+        return success();
+    }
+
+    // 提交答案
+    @PutMapping("/submitHomeWork")
+    public Response submitHomeWork(@RequestParam("answerSheet") String answerSheet,
+                                   @RequestParam("homeworkID") String homeworkID,
+                                   @RequestParam("homeworkAnswerId") String homeworkAnswerId,
+                                   @SessionAttribute(value = "opCookie", required = false) String opCookie) throws IOException {
+        if (StringUtils.isEmpty(opCookie)) {
+            return error("用户未登录");
+        }
+        JsonNode jsonNode = network.submitHomeWork(opCookie, homeworkID, homeworkAnswerId, answerSheet);
+        System.out.println(jsonNode.toString());
+        return success(jsonNode);
     }
 
 

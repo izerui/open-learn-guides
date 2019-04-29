@@ -9,12 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 
 @Component
 @Slf4j
@@ -34,7 +30,11 @@ public class NetworkReptiles {
     // 获取作业列表
     private final static String myWorkUrl = "http://learn.open.com.cn/StudentCenter/MyWork/GetOnlineJsonAll?t=" + Math.random();
     // 获取答案
-    private final static String answerUrl = "http://learn.open.com.cn/StudentCenter/OnlineJob/GetQuestionDetail?bust="+System.currentTimeMillis()+"&itemBankId=%s&questionId=%s&_="+System.currentTimeMillis();
+    private final static String answerUrl = "http://learn.open.com.cn/StudentCenter/OnlineJob/GetQuestionDetail?bust=" + System.currentTimeMillis() + "&itemBankId=%s&questionId=%s&_=" + System.currentTimeMillis();
+    // 保存答案
+    private final static String saveHomeworkUrl = "http://learn.open.com.cn/StudentCenter/OnlineJob/SaveHomework";
+    // 提交答案
+    private final static String submitHomeworkUrl = "http://learn.open.com.cn/StudentCenter/OnlineJob/SubmitHomework";
 
     private Request.Builder createRequest() {
         return new Request.Builder()
@@ -116,6 +116,7 @@ public class NetworkReptiles {
 
     /**
      * 获取某一个试卷的key
+     *
      * @param cookie
      * @param url
      * @return
@@ -123,7 +124,7 @@ public class NetworkReptiles {
      */
     public String getKey(String cookie, String url) throws IOException {
         Request request = createRequest(cookie)
-                .url(URLDecoder.decode(url,"utf-8"))
+                .url(URLDecoder.decode(url, "utf-8"))
                 .get()
                 .build();
         Call call = new OkHttpClient().newCall(request);
@@ -131,8 +132,8 @@ public class NetworkReptiles {
         String testPaperHtml = response.body().string();
         String[] split = URLDecoder.decode(Jsoup.parse(testPaperHtml).getElementById("online").attr("src"), "utf-8").split("&");
         for (String s : split) {
-            if(s.startsWith("key=")){
-                return s.replace("key=","");
+            if (s.startsWith("key=")) {
+                return s.replace("key=", "");
             }
         }
         return null;
@@ -140,6 +141,7 @@ public class NetworkReptiles {
 
     /**
      * 获取试卷
+     *
      * @param opCookie
      * @param url
      * @return
@@ -157,6 +159,7 @@ public class NetworkReptiles {
 
     /**
      * 获取答案
+     *
      * @param opCookie
      * @param itemBankId
      * @param questionId
@@ -165,12 +168,69 @@ public class NetworkReptiles {
      */
     public Object getAnswer(String opCookie, String itemBankId, String questionId) throws IOException {
         Request request = createRequest(opCookie)
-                .url(String.format(answerUrl,itemBankId,questionId))
+                .url(String.format(answerUrl, itemBankId, questionId))
                 .get()
                 .build();
         Call call = new OkHttpClient().newCall(request);
         Response response = call.execute();
         Map ans = objectMapper.readValue(response.body().bytes(), Map.class);
         return ans.get("data");
+    }
+
+    /**
+     * 保存答案至学习平台
+     *
+     * @param opCookie
+     * @param homeworkID
+     * @param homeworkAnswerId
+     * @param answerSheet
+     * @return
+     */
+    public void saveHomeWork(String opCookie, String homeworkID, String homeworkAnswerId, String answerSheet) throws IOException {
+        Request request = createRequest(opCookie)
+                .url(saveHomeworkUrl)
+                .post(
+                        new FormBody.Builder()
+                                .add("homeworkID", homeworkID)
+                                .add("homeworkAnswerId", homeworkAnswerId)
+                                .add("answerSheet", answerSheet)
+                                .build()
+                )
+                .build();
+        Call call = new OkHttpClient().newCall(request);
+        Response response = call.execute();
+        JsonNode jsonNode = new ObjectMapper().readValue(response.body().bytes(), JsonNode.class);
+        if (jsonNode.path("status").asInt() != 0) { // 失败
+            throw new RuntimeException("保存失败:" + jsonNode.path("message").asText());
+        }
+    }
+
+    /**
+     * 提交答案
+     *
+     * @param opCookie
+     * @param homeworkID
+     * @param homeworkAnswerId
+     * @param answerSheet
+     * @return
+     */
+    public JsonNode submitHomeWork(String opCookie, String homeworkID, String homeworkAnswerId, String answerSheet) throws IOException {
+        Request request = createRequest(opCookie)
+                .url(submitHomeworkUrl)
+                .post(
+                        new FormBody.Builder()
+                                .add("homeworkID", homeworkID)
+                                .add("homeworkAnswerId", homeworkAnswerId)
+                                .add("answerSheet", answerSheet)
+                                .build()
+                )
+                .build();
+        Call call = new OkHttpClient().newCall(request);
+        Response response = call.execute();
+        JsonNode jsonNode = new ObjectMapper().readValue(response.body().bytes(), JsonNode.class);
+        if (jsonNode.path("status").asInt() != 0) { // 失败
+            throw new RuntimeException("提交失败:" + jsonNode.path("message").asText());
+        }
+        return jsonNode.path("data");
     }
 }

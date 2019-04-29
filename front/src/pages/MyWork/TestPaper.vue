@@ -16,6 +16,12 @@
                 </el-card>
             </el-collapse-item>
         </el-collapse>
+
+        <span slot="footer" class="dialog-footer">
+            <span v-if="qesAnswers" style="float: left;">{{qesAnswers.length}}个答案</span>
+            <el-button type="primary" v-if="doneAnswer" @click="saveHomeWork">保存答案</el-button>
+            <el-button type="primary" v-else disabled="">保存答案</el-button>
+        </span>
     </el-dialog>
 </template>
 
@@ -41,13 +47,15 @@
             return {
                 itemBankId: '',
                 sections: [],
-                doneAnswer: false
+                doneAnswer: false,
+                qesAnswers: [],
             }
         },
         computed: {
             dialogShow: {
                 get() {
                     if (this.show) {
+                        this.qesAnswers = [];
                         this.doneAnswer = false;
                         this.wrapSections();
                         this.getAnswers();
@@ -58,16 +66,17 @@
                     this.$emit('update:show', val);
                 }
             },
-            titleLabel(){
-                if(this.doneAnswer){
+            titleLabel() {
+                if (this.doneAnswer) {
                     return this.paperJson.ExerciseName;
-                }else{
+                } else {
                     return this.paperJson.ExerciseName + "   -  (正在获取答案)...";
                 }
             }
         },
         methods: {
             wrapSections() {
+                this.qesAnswers = [];
                 this.itemBankId = this.paperJson.TestPaperContent.Model.P3;
 
                 this.sections = this.paperJson.TestPaperContent.Sections;
@@ -105,12 +114,47 @@
                             }
                         })
                         s.items[j] = res;
+                        this.qesAnswers.push(res);
                         // s.items.splice(j, 1, res);
                         // q.Choices = res.Choices;
                     }
                 }
                 this.doneAnswer = true;
-                console.log("答案", this.sections);
+                console.log("答案", this.qesAnswers);
+            },
+            async saveHomeWork() {
+                var answerSheet = {
+                    Items: this.qesAnswers.map(q => {
+                        var a = {};
+                        a.I1 = q.I1;
+                        a.I15 = q.I7;
+                        a.Sub = [];
+                        if (q.Sub) {
+                            a.Sub = q.Sub;
+                        }
+                        return a;
+                    })
+                };
+
+                await this.$put("/saveHomeWork", {
+                    homeworkID: this.paperJson.HomeworkId,
+                    homeworkAnswerId: this.paperJson.HomeworkAnswerId,
+                    answerSheet: JSON.stringify(answerSheet),
+                });
+                this.$confirm('是否提交至学习平台？')
+                    .then(_ => {
+                        this.$put("/submitHomeWork", {
+                            homeworkID: this.paperJson.HomeworkId,
+                            homeworkAnswerId: this.paperJson.HomeworkAnswerId,
+                            answerSheet: JSON.stringify(answerSheet),
+                        }).then(res => {
+                            console.log(res);
+                            this.$message.success("提交成功,本次分数:" + res.score + '分');
+                            this.dialogShow = false;
+                        })
+                    })
+                    .catch(_ => {
+                    });
             }
         }
     }
