@@ -11,6 +11,9 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Component
@@ -30,8 +33,8 @@ public class NetworkReptiles {
     private final static String listCourseUrl = "http://learn.open.com.cn/StudentCenter/MyCourse/GetMyCourse?t=" + Math.random() + "&StatusCode=1";
     // 获取作业列表
     private final static String myWorkUrl = "http://learn.open.com.cn/StudentCenter/MyWork/GetOnlineJsonAll?t=" + Math.random();
-
-    private final static String testPaperUrl = "http://learn.open.com.cn/StudentCenter/OnLineJob/Redirect?mode=1&courseExerciseID=0&submitCount=0&studentHomeworkId=b1e1b1e8-fb1c-4049-8931-11499e51e964";
+    // 获取答案
+    private final static String answerUrl = "http://learn.open.com.cn/StudentCenter/OnlineJob/GetQuestionDetail?bust="+System.currentTimeMillis()+"&itemBankId=%s&questionId=%s&_="+System.currentTimeMillis();
 
     private Request.Builder createRequest() {
         return new Request.Builder()
@@ -150,21 +153,24 @@ public class NetworkReptiles {
         Response response = call.execute();
         JsonNode jsonNode = new ObjectMapper().readValue(response.body().bytes(), JsonNode.class);
         return jsonNode.path("data");
-//        JsonNode testPaperContent = jsonNode.path("data").path("TestPaperContent");
-//        String itemBankId = testPaperContent.path("Model").path("P3").asText();
-//        JsonNode path = testPaperContent.path("Sections");
-//        path.elements().forEachRemaining(s -> {
-//            System.out.println("--------------------" + s.path("Title").asText() + "------------------");
-//            AtomicReference<Integer> i = new AtomicReference<>(1);
-//            s.path("ItemID").elements().forEachRemaining(item -> {
-//                try {
-//                    System.out.print(i.getAndSet(i.get() + 1) + ". ");
-//                    getAnswers(itemBankId, item.asText());
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-////                System.out.println(item.asText());
-//            });
-//        });
+    }
+
+    /**
+     * 获取答案
+     * @param opCookie
+     * @param itemBankId
+     * @param questionId
+     * @return
+     * @throws IOException
+     */
+    public Object getAnswer(String opCookie, String itemBankId, String questionId) throws IOException {
+        Request request = createRequest(opCookie)
+                .url(String.format(answerUrl,itemBankId,questionId))
+                .get()
+                .build();
+        Call call = new OkHttpClient().newCall(request);
+        Response response = call.execute();
+        Map ans = objectMapper.readValue(response.body().bytes(), Map.class);
+        return ans.get("data");
     }
 }

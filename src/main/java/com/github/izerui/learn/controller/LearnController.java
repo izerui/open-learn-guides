@@ -5,13 +5,11 @@ import com.github.izerui.learn.network.NetworkReptiles;
 import com.github.izerui.learn.response.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.SessionAttribute;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.List;
 
 import static com.github.izerui.learn.response.Response.error;
 import static com.github.izerui.learn.response.Response.success;
@@ -38,7 +36,7 @@ public class LearnController {
 
     // 获取用户信息
     @GetMapping("/userInfo")
-    public Response getUserInfo(@SessionAttribute(value = "opUser",required = false) String opUser) {
+    public Response getUserInfo(@SessionAttribute(value = "opUser", required = false) String opUser) {
         if (StringUtils.isEmpty(opUser)) {
             return error("用户未登录");
         }
@@ -47,7 +45,7 @@ public class LearnController {
 
     // 获取作业
     @GetMapping("/myWork")
-    public Response myWork(@SessionAttribute(value = "opCookie",required = false) String opCookie) throws IOException {
+    public Response myWork(@SessionAttribute(value = "opCookie", required = false) String opCookie) throws IOException {
         if (StringUtils.isEmpty(opCookie)) {
             return error("用户未登录");
         }
@@ -58,7 +56,7 @@ public class LearnController {
     // 获取key
     @GetMapping("/getTestPagerKey")
     public Response getKey(@RequestParam("url") String url,
-                           @SessionAttribute(value = "opCookie",required = false) String opCookie) throws IOException {
+                           @SessionAttribute(value = "opCookie", required = false) String opCookie) throws IOException {
         if (StringUtils.isEmpty(opCookie)) {
             return error("用户未登录");
         }
@@ -69,12 +67,24 @@ public class LearnController {
     // 获取试卷
     @GetMapping("/getTestPaper")
     public Response getTestPaper(@RequestParam("url") String url,
-                              @SessionAttribute(value = "opCookie",required = false) String opCookie) throws IOException {
+                                 @SessionAttribute(value = "opCookie", required = false) String opCookie) throws IOException {
         if (StringUtils.isEmpty(opCookie)) {
             return error("用户未登录");
         }
-        JsonNode testPaper = network.getTestPaper(opCookie,url);
+        JsonNode testPaper = network.getTestPaper(opCookie, url);
         return success(testPaper);
+    }
+
+    // 获取答案
+    @PostMapping("/getAnswer")
+    public Response getAnswers(@RequestParam("itemBankId") String itemBankId,
+                               @RequestParam("questionId") String questionId,
+                               @SessionAttribute(value = "opCookie", required = false) String opCookie) throws IOException {
+        if (StringUtils.isEmpty(opCookie)) {
+            return error("用户未登录");
+        }
+        Object answer = network.getAnswer(opCookie, itemBankId, questionId);
+        return success(answer);
     }
 
 
