@@ -7,7 +7,7 @@
                     <div slot="header" class="clearfix">
                         <span>{{index+1}}. </span>
                         <span>{{qes.I2}}</span>
-                        <span style="float: right;">{{qes.ans}}</span>
+                        <span style="float: right;">{{index+1}}. {{qes.ans}}</span>
                     </div>
                     <div v-for="ch in qes.Choices" class="text item">
                         <span>{{ch.I1}}. </span>
