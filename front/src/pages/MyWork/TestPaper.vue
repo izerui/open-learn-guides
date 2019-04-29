@@ -1,5 +1,5 @@
 <template>
-    <el-dialog :visible.sync="dialogShow" :title="titleLabel">
+    <el-dialog :visible.sync="dialogShow" :title="titleLabel" :close-on-click-modal="false">
         <el-collapse>
             <el-collapse-item :title="sec.Title" :name="sec.Identifier"
                               v-for="sec in sections">
@@ -62,7 +62,7 @@
                 if(this.doneAnswer){
                     return this.paperJson.ExerciseName;
                 }else{
-                    return this.paperJson.ExerciseName + "   (正在获取答案)...";
+                    return this.paperJson.ExerciseName + "   -  (正在获取答案)...";
                 }
             }
         },
