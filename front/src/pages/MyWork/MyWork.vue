@@ -52,16 +52,17 @@
                     });
                 })
                 this.workList = alist;
-                console.log(this.workList);
+                console.log("作业列表...", this.workList);
             },
             async gotoDoWork(row) {
-                console.log(row);
+                console.log("点击行",row);
                 const url = `http://learn.open.com.cn/StudentCenter/OnLineJob/Redirect?mode=1&courseExerciseID=${row.CourseExerciseID}&submitCount=${row.SubmitCount}&studentHomeworkId=${row.studentHomeworkId}`;
-                const key = await this.$get("/getTestPagerKey",{url:encodeURI(url)});
-
-                const answerUrl = `http://learn.open.com.cn/StudentCenter/OnlineJob/DoHomework?courseExerciseId=${row.CourseExerciseID}&key=${key}&studentHomeworkId=${row.studentHomeworkId}&_=${(new Date()).getTime()}`;
-
-                console.log(answerUrl);
+                console.log('跳转试卷页面', url);
+                const key = await this.$get("/getTestPagerKey", {url: encodeURI(url)});
+                const testPaperUrl = `http://learn.open.com.cn/StudentCenter/OnlineJob/DoHomework?courseExerciseId=${row.CourseExerciseID}&key=${key}&studentHomeworkId=${row.studentHomeworkId}&_=${(new Date()).getTime()}`;
+                console.log("请求试卷key", testPaperUrl);
+                const testPaperJson = await this.$get("/getTestPaper", {url: encodeURI(testPaperUrl)});
+                console.log("获取试卷", testPaperJson);
                 // window.open(url,"_blank");
             }
         }

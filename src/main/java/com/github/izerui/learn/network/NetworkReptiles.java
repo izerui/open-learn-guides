@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Component
 @Slf4j
@@ -132,5 +133,38 @@ public class NetworkReptiles {
             }
         }
         return null;
+    }
+
+    /**
+     * 获取试卷
+     * @param opCookie
+     * @param url
+     * @return
+     */
+    public JsonNode getTestPaper(String opCookie, String url) throws IOException {
+        Request request = createRequest(opCookie)
+                .url(url)
+                .get()
+                .build();
+        Call call = new OkHttpClient().newCall(request);
+        Response response = call.execute();
+        JsonNode jsonNode = new ObjectMapper().readValue(response.body().bytes(), JsonNode.class);
+        return jsonNode.path("data");
+//        JsonNode testPaperContent = jsonNode.path("data").path("TestPaperContent");
+//        String itemBankId = testPaperContent.path("Model").path("P3").asText();
+//        JsonNode path = testPaperContent.path("Sections");
+//        path.elements().forEachRemaining(s -> {
+//            System.out.println("--------------------" + s.path("Title").asText() + "------------------");
+//            AtomicReference<Integer> i = new AtomicReference<>(1);
+//            s.path("ItemID").elements().forEachRemaining(item -> {
+//                try {
+//                    System.out.print(i.getAndSet(i.get() + 1) + ". ");
+//                    getAnswers(itemBankId, item.asText());
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+////                System.out.println(item.asText());
+//            });
+//        });
     }
 }

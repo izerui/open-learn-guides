@@ -11,7 +11,7 @@
                 <!--</el-badge>-->
                 <!--</span>-->
                 <!--</div>-->
-                <el-dropdown>
+                <!--<el-dropdown>-->
                     <div class="user-profile-body">
                         <img class="user-avatar"
                              src="https://img.alicdn.com/tfs/TB1ONhloamWBuNjy1XaXXXCbXXa-200-200.png">
@@ -35,7 +35,7 @@
                             <!---->
                         <!--</el-dropdown-item>-->
                     <!--</el-dropdown-menu>-->
-                </el-dropdown>
+                <!--</el-dropdown>-->
             </div>
         </div>
     </el-menu>
