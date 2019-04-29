@@ -24,7 +24,7 @@
                 </template>
             </el-table-column>
         </el-table>
-        <TestPaper :show.sync="paperShow" :paper-json="paperJson"></TestPaper>
+        <TestPaper :show.sync="paperShow" :paper-json="paperJson" @refresh="getMyWork"></TestPaper>
     </el-container>
 </template>
 

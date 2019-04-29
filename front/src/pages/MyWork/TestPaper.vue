@@ -151,6 +151,7 @@
                             console.log(res);
                             this.$message.success("提交成功,本次分数:" + res.score + '分');
                             this.dialogShow = false;
+                            this.$emit("refresh");
                         })
                     })
                     .catch(_ => {
