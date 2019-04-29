@@ -73,7 +73,7 @@ public class NetworkReptiles {
         String cookie = String.join(";", response.headers("Set-Cookie"));
         String message = jsonNode.path("message").asText();
         if (!message.contains("登录成功")) {
-            throw new RuntimeException(message);
+            throw new RuntimeException(message+"，请先使用当前账号成功登录学习平台.");
         }
         return cookie;
     }
