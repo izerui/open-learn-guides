@@ -6,7 +6,7 @@ const headerMenuConfig = [];
 
 const asideMenuConfig = [
   {
-    path: '/mywork',
+    path: '/',
     name: '作业列表',
     icon: 'el-icon-date',
   },

@@ -69,8 +69,8 @@ export default {
     return {
       backgroundImage: backgroundImage,
       user: {
-        username: 'liuyhopen1903',
-        password: 'P8425409',
+        username: '',
+        password: '',
       },
     };
   },
@@ -81,7 +81,7 @@ export default {
     async submitBtn() {
       const result = await this.$get("/login",this.user);
       console.log(result);
-      this.$router.push("/table");
+      this.$router.push("/");
     },
   },
 };

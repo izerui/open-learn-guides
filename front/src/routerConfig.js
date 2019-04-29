@@ -10,30 +10,30 @@ import MyWork from "./pages/MyWork/MyWork";
 
 const routerConfig = [
   {
-    path: '/mywork',
+    path: '/',
     layout: HeaderAsideLayout,
     component: MyWork,
   },
-  {
-    path: '/form',
-    layout: HeaderAsideLayout,
-    component: NotFound,
-  },
-  {
-    path: '/charts',
-    layout: HeaderAsideLayout,
-    component: NotFound,
-  },
-  {
-    path: '/profile',
-    layout: HeaderAsideLayout,
-    component: NotFound,
-  },
-  {
-    path: '/result',
-    layout: HeaderAsideLayout,
-    component: NotFound,
-  },
+  // {
+  //   path: '/form',
+  //   layout: HeaderAsideLayout,
+  //   component: NotFound,
+  // },
+  // {
+  //   path: '/charts',
+  //   layout: HeaderAsideLayout,
+  //   component: NotFound,
+  // },
+  // {
+  //   path: '/profile',
+  //   layout: HeaderAsideLayout,
+  //   component: NotFound,
+  // },
+  // {
+  //   path: '/result',
+  //   layout: HeaderAsideLayout,
+  //   component: NotFound,
+  // },
   {
     path: '/login',
     layout: Login,
