@@ -69,12 +69,16 @@ public class NetworkReptiles {
         Call call = new OkHttpClient().newCall(request);
         Response response = call.execute();
         JsonNode jsonNode = objectMapper.readValue(response.body().bytes(), JsonNode.class);
+        if (jsonNode.path("status").asInt() != 0) { // 失败
+            throw new RuntimeException(jsonNode.path("message").asText());
+        }
 
         String cookie = String.join(";", response.headers("Set-Cookie"));
         String message = jsonNode.path("message").asText();
         if (!message.contains("登录成功")) {
             throw new RuntimeException(message+"，请先使用当前账号成功登录学习平台.");
         }
+        log.info("登录成功:{}",loginName);
         return cookie;
     }
 
@@ -92,7 +96,12 @@ public class NetworkReptiles {
         Call call = new OkHttpClient().newCall(request);
         Response response = call.execute();
         JsonNode jsonNode = objectMapper.readValue(response.body().bytes(), JsonNode.class);
-        return jsonNode.path("data");
+        log.info("获取课程列表:{}",jsonNode);
+        if (jsonNode.path("status").asInt() != 0) { // 失败
+            throw new RuntimeException(jsonNode.path("message").asText());
+        }
+        JsonNode data = jsonNode.path("data");
+        return data;
     }
 
 
@@ -111,7 +120,12 @@ public class NetworkReptiles {
         Call call = new OkHttpClient().newCall(request);
         Response response = call.execute();
         JsonNode jsonNode = objectMapper.readValue(response.body().bytes(), JsonNode.class);
-        return jsonNode.path("data");
+        log.info("获取作业列表:{}",jsonNode);
+        if (jsonNode.path("status").asInt() != 0) { // 失败
+            throw new RuntimeException(jsonNode.path("message").asText());
+        }
+        JsonNode data = jsonNode.path("data");
+        return data;
     }
 
     /**
@@ -154,7 +168,12 @@ public class NetworkReptiles {
         Call call = new OkHttpClient().newCall(request);
         Response response = call.execute();
         JsonNode jsonNode = new ObjectMapper().readValue(response.body().bytes(), JsonNode.class);
-        return jsonNode.path("data");
+        log.info("获取试卷:{}",jsonNode);
+        if (jsonNode.path("status").asInt() != 0) { // 失败
+            throw new RuntimeException(jsonNode.path("message").asText());
+        }
+        JsonNode data = jsonNode.path("data");
+        return data;
     }
 
     /**
@@ -166,15 +185,20 @@ public class NetworkReptiles {
      * @return
      * @throws IOException
      */
-    public Object getAnswer(String opCookie, String itemBankId, String questionId) throws IOException {
+    public JsonNode getAnswer(String opCookie, String itemBankId, String questionId) throws IOException {
         Request request = createRequest(opCookie)
                 .url(String.format(answerUrl, itemBankId, questionId))
                 .get()
                 .build();
         Call call = new OkHttpClient().newCall(request);
         Response response = call.execute();
-        Map ans = objectMapper.readValue(response.body().bytes(), Map.class);
-        return ans.get("data");
+        JsonNode jsonNode = objectMapper.readValue(response.body().bytes(), JsonNode.class);
+        log.info("获取答案:{}",jsonNode);
+        if (jsonNode.path("status").asInt() != 0) { // 失败
+            throw new RuntimeException(jsonNode.path("message").asText());
+        }
+        JsonNode data = jsonNode.path("data");
+        return data;
     }
 
     /**
@@ -200,6 +224,7 @@ public class NetworkReptiles {
         Call call = new OkHttpClient().newCall(request);
         Response response = call.execute();
         JsonNode jsonNode = new ObjectMapper().readValue(response.body().bytes(), JsonNode.class);
+        log.info("保存答案:{}",jsonNode);
         if (jsonNode.path("status").asInt() != 0) { // 失败
             throw new RuntimeException("保存失败:" + jsonNode.path("message").asText());
         }
@@ -228,6 +253,7 @@ public class NetworkReptiles {
         Call call = new OkHttpClient().newCall(request);
         Response response = call.execute();
         JsonNode jsonNode = new ObjectMapper().readValue(response.body().bytes(), JsonNode.class);
+        log.info("提交答案:{}",jsonNode);
         if (jsonNode.path("status").asInt() != 0) { // 失败
             throw new RuntimeException("提交失败:" + jsonNode.path("message").asText());
         }

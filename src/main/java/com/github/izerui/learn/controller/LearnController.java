@@ -3,6 +3,7 @@ package com.github.izerui.learn.controller;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.izerui.learn.network.NetworkReptiles;
 import com.github.izerui.learn.response.Response;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +14,7 @@ import java.io.IOException;
 import static com.github.izerui.learn.response.Response.error;
 import static com.github.izerui.learn.response.Response.success;
 
+@Slf4j
 @RestController
 public class LearnController {
 
@@ -25,9 +27,6 @@ public class LearnController {
                                 @RequestParam("password") String password,
                                 HttpSession session) throws IOException {
         String opCookie = network.login(username, password);
-        System.out.print(username);
-        System.out.print(" : ");
-        System.out.println(opCookie);
         session.setAttribute("opCookie", opCookie);
         session.setAttribute("opUser", username);
         return success();
@@ -82,7 +81,7 @@ public class LearnController {
         if (StringUtils.isEmpty(opCookie)) {
             return error("用户未登录");
         }
-        Object answer = network.getAnswer(opCookie, itemBankId, questionId);
+        JsonNode answer = network.getAnswer(opCookie, itemBankId, questionId);
         return success(answer);
     }
 
