@@ -10,7 +10,7 @@
             <v-toolbar-items>
                 <v-btn dark v-if="status === 'unknown'" flat @click="getAnswers">获取答案</v-btn>
                 <v-btn dark v-if="status === 'done'" flat @click="saveHomeWork">保存答案</v-btn>
-                <v-btn dark v-if="status === 'saved'" flat @click="submitHomeWork">提交答案</v-btn>
+                <v-btn dark v-if="status === 'saved'" flat @click="submitHomeWork">提交作业</v-btn>
             </v-toolbar-items>
         </v-toolbar>
 
