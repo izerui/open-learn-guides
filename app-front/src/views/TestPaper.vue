@@ -4,10 +4,13 @@
             <v-btn icon dark @click="$emit('close')">
                 <v-icon>close</v-icon>
             </v-btn>
-            <v-toolbar-title>{{titleLabel}}</v-toolbar-title>
+            <v-toolbar-title>{{paperJson.ExerciseName}}</v-toolbar-title>
             <v-spacer></v-spacer>
+            <span v-if="qesAnswers" style="float: left;">{{qesAnswers.length}}个答案</span>
             <v-toolbar-items>
-                <v-btn dark flat @click="$emit('close')">保存答案</v-btn>
+                <v-btn dark v-if="status === 'unknown'" flat @click="getAnswers">获取答案</v-btn>
+                <v-btn dark v-if="status === 'done'" flat @click="saveHomeWork">保存答案</v-btn>
+                <v-btn dark v-if="status === 'saved'" flat @click="submitHomeWork">提交答案</v-btn>
             </v-toolbar-items>
         </v-toolbar>
 
@@ -44,15 +47,16 @@
                 required: true
             }
         },
+        data(){
+          return {
+              qesAnswers: [],
+              status: 'unknown',
+          }
+        },
         computed: {
-            titleLabel() {
-                if (this.doneAnswer) {
-                    return this.paperJson.ExerciseName;
-                } else {
-                    return this.paperJson.ExerciseName + "   -  (正在获取答案)...";
-                }
-            },
             sections() {
+                this.status = 'unknown';
+                this.qesAnswers = [];
                 var sections = this.paperJson.TestPaperContent.Sections;
 
                 const questions = this.paperJson.TestPaperContent.Items;
@@ -71,6 +75,73 @@
                 });
                 console.log("包装后", sections);
                 return sections;
+            },
+            answerJson(){
+                var answerSheet = {
+                    Items: this.qesAnswers.map(q => {
+                        var a = {};
+                        a.I1 = q.I1;
+                        a.I15 = q.I7;
+                        a.Sub = [];
+                        if (q.Sub) {
+                            a.Sub = q.Sub;
+                        }
+                        return a;
+                    })
+                };
+                return answerSheet;
+            }
+        },
+        created(){
+        },
+        methods:{
+            async getAnswers() {
+                this.status = 'geting';
+                const itemBankId = this.paperJson.TestPaperContent.Model.P3;
+                for (var i = 0; i < this.sections.length; i++) {
+                    const s = this.sections[i];
+                    for (var j = 0; j < s.items.length; j++) {
+                        const q = s.items[j];
+                        const res = await this.$postUrl("/getAnswer", {
+                            itemBankId: itemBankId,
+                            questionId: q.I1
+                        });
+                        res.ans = "答案: ";
+                        res.Choices.forEach(ch => {
+                            if (ch.IsCorrect) {
+                                res.ans += ch.I1;
+                                res.ans += "、";
+                            }
+                        })
+                        s.items[j] = res;
+                        this.qesAnswers.push(res);
+                        // s.items.splice(j, 1, res);
+                        // q.Choices = res.Choices;
+                    }
+                }
+                this.status = 'done';
+                console.log("答案", this.qesAnswers);
+            },
+            async saveHomeWork() {
+                await this.$putUrl("/saveHomeWork", {
+                    homeworkID: this.paperJson.HomeworkId,
+                    homeworkAnswerId: this.paperJson.HomeworkAnswerId,
+                    answerSheet: JSON.stringify(this.answerJson),
+                });
+                this.$message.success("保存成功,请提交作业!");
+                this.status = 'saved';
+            },
+            async submitHomeWork(){
+                this.$putUrl("/submitHomeWork", {
+                    homeworkID: this.paperJson.HomeworkId,
+                    homeworkAnswerId: this.paperJson.HomeworkAnswerId,
+                    answerSheet: JSON.stringify(this.answerJson),
+                }).then(res => {
+                    console.log(res);
+                    this.$message.success("提交成功,本次分数:" + res.score + '分');
+                    this.status = 'submited';
+                    this.$emit("refresh");
+                })
             }
         }
     }

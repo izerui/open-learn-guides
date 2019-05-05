@@ -34,7 +34,7 @@
 
         <!-- 试卷详情页 -->
         <v-dialog v-model="paperShow" fullscreen hide-overlay transition="dialog-bottom-transition" scrollable>
-            <TestPaper @close="paperShow=false" :paper-json="paperJson"/>
+            <TestPaper @close="paperShow=false" :paper-json="paperJson" @refresh="paperShow=false;getMyWork()"/>
         </v-dialog>
     </v-layout>
 </template>
