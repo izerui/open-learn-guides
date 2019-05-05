@@ -60,7 +60,7 @@
                     icon: 'dashboard',
                     url: '/about',
                 }
-            ]
+            ],
         }),
         created(){
             this.getUser();
