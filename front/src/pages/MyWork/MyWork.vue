@@ -19,7 +19,10 @@
             <el-table-column prop="MaxScore" label="操作" width="250px">
                 <template slot-scope="scope">
                     <div>
-                        <el-button size="mini" @click="gotoDoWork(scope.row)">答案</el-button>
+                        <el-button size="mini" v-if="scope.row.state === '2' || scope.row.state === '3'" @click="gotoDoWork(scope.row)">继续作答</el-button>
+                        <el-button size="mini" v-else-if="scope.row.state === '4'">批阅中</el-button>
+                        <el-button size="mini" v-else-if="scope.row.state === '5'" @click="gotoDoWork(scope.row)">重做</el-button>
+                        <el-button size="mini" v-else @click="gotoDoWork(scope.row)">做作业</el-button>
                     </div>
                 </template>
             </el-table-column>
