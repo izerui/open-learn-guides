@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.github.izerui</groupId>
     <artifactId>open-learn-guides</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.2.1-SNAPSHOT</version>
     <name>open-learn-guides</name>
     <description>奥鹏学习平台帮助文档</description>
 
