@@ -34,7 +34,10 @@
 
         <!-- 试卷详情页 -->
         <v-dialog v-model="paperShow" fullscreen hide-overlay transition="dialog-bottom-transition" scrollable>
-            <TestPaper @close="paperShow=false" :paper-json="paperJson" @refresh="paperShow=false;getMyWork()"/>
+            <TestPaper @close="paperShow=false"
+                       :paper-json="paperJson"
+                       :sections="sections"
+                       @refresh="paperShow=false;getMyWork()"/>
         </v-dialog>
     </v-layout>
 </template>
@@ -65,7 +68,8 @@
                     rowsPerPage: -1,// -1 for All"
                     sortBy: null,
                     totalItems: null
-                }
+                },
+                sections: []
             };
         },
         created() {
@@ -96,6 +100,23 @@
                 console.log("请求试卷key", testPaperUrl);
                 this.paperJson = await this.$getUrl("/getTestPaper", {url: encodeURI(testPaperUrl)});
                 console.log("获取试卷", this.paperJson);
+                // 包装 单选、多选下面的对象数组  Sections 对象下 放入 items题目对象
+                var sections = this.paperJson.TestPaperContent.Sections;
+                const questions = this.paperJson.TestPaperContent.Items;
+                sections.forEach(s => {
+                    if (!s.items) {
+                        s.items = [];
+                    }
+                    s.ItemID.forEach(id => {
+                        questions.forEach(ques => {
+                            if (ques.I1 === id) {
+                                s.items.push(ques);
+                            }
+                        })
+                    })
+                });
+                this.sections = sections;
+                console.log("包装后", this.paperJson);
                 this.paperShow = true;
             }
         }

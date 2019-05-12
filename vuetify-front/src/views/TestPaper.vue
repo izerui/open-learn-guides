@@ -44,7 +44,17 @@
         props: {
             paperJson: {
                 type: Object,
-                required: true
+                required: true,
+                default: {
+                    status: 'unknown'
+                }
+            },
+            itemBankId: String,
+            homeworkID: String,
+            homeworkAnswerId: String,
+            sections: {
+                type: Array,
+                default: []
             }
         },
         data(){
@@ -54,28 +64,6 @@
           }
         },
         computed: {
-            sections() {
-                this.status = 'unknown';
-                this.qesAnswers = [];
-                var sections = this.paperJson.TestPaperContent.Sections;
-
-                const questions = this.paperJson.TestPaperContent.Items;
-
-                sections.forEach(s => {
-                    if (!s.items) {
-                        s.items = [];
-                    }
-                    s.ItemID.forEach(id => {
-                        questions.forEach(ques => {
-                            if (ques.I1 === id) {
-                                s.items.push(ques);
-                            }
-                        })
-                    })
-                });
-                console.log("包装后", sections);
-                return sections;
-            },
             answerJson(){
                 var answerSheet = {
                     Items: this.qesAnswers.map(q => {
@@ -97,13 +85,12 @@
         methods:{
             async getAnswers() {
                 this.status = 'geting';
-                const itemBankId = this.paperJson.TestPaperContent.Model.P3;
                 for (var i = 0; i < this.sections.length; i++) {
                     const s = this.sections[i];
                     for (var j = 0; j < s.items.length; j++) {
                         const q = s.items[j];
                         const res = await this.$postUrl("/getAnswer", {
-                            itemBankId: itemBankId,
+                            itemBankId: this.paperJson.TestPaperContent.Model.P3,
                             questionId: q.I1
                         });
                         res.ans = "答案: ";
