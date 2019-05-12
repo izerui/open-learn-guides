@@ -63,7 +63,7 @@ http.install = function (Vue, axios) {
             // NProgress.done()
             return data;
         }
-        const {success, errCode, errMsg} = data;
+        const {success, errMsg} = data;
         if (!success) {
             if (errMsg === '用户未登录') {
                 router.push({path: '/login'})
