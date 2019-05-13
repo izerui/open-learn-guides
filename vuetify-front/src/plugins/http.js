@@ -1,6 +1,5 @@
-import qs from 'qs';
 import router from '../router';
-import axios from 'axios';
+import flyIo from 'flyio';
 import Vue from 'vue';
 
 /**
@@ -26,15 +25,14 @@ const codeMessage = {
 
 const http = {};
 
-http.install = function (Vue, axios) {
-    const VueAxios = Vue;
+http.install = function (Vue, fly) {
 
     if (http.installed) {
         return;
     }
     http.installed = true;
-    if (!axios) {
-        console.error('You have to install axios');
+    if (!fly) {
+        console.error('You have to install flyIo');
         return;
     }
     const checkStatus = (response) => {
@@ -45,127 +43,67 @@ http.install = function (Vue, axios) {
         const errorText = codeMessage[status] || statusText;
         Vue.prototype.$message.error(errorText);
         const error = new Error(errorText);
-        error.ierpStatus = response.status;
+        error.status = response.status;
         throw error;
     };
 
-    axios.interceptors.request.use((config) => {
-        // config.headers.postCode = sessionStorage.getItem('PostCode');
-        // NProgress.start()
-        return config;
+    //添加请求拦截器
+    fly.interceptors.request.use((request)=>{
+        //给所有请求添加自定义header
+        request.headers["X-Tag"]="flyio";
+        //打印出请求体
+        // console.log(request.body)
+        //终止请求
+        //var err=new Error("xxx")
+        //err.request=request
+        //return Promise.reject(new Error(""))
+
+        //可以显式返回request, 也可以不返回，没有返回值时拦截器中默认返回request
+        return request;
     });
 
-    axios.interceptors.response.use((response) => {
-        checkStatus(response);
-        const data = response.data;
-        // 对二进制文件进行处理。
-        if (data instanceof Blob) {
+    //添加响应拦截器，响应拦截器会在then/catch处理之前执行
+    fly.interceptors.response.use(
+        (response) => {
+            checkStatus(response);
+            const data = response.data;
+            // 对二进制文件进行处理。
+            if (data instanceof Blob) {
+                // NProgress.done()
+                return data;
+            }
+            const {success, errMsg} = data;
+            if (!success) {
+                if (errMsg === '用户未登录') {
+                    router.push({path: '/login'})
+                } else {
+                    Vue.prototype.$message.error(errMsg === undefined || errMsg === null || errMsg === '' ? '服务器异常' : errMsg);
+                }
+            }
+            //只将请求结果的data字段返回
+            return data.data;
+        },
+        (error) => {
+            //发生网络错误后会走到这里
+            //return Promise.resolve("ssss")
             // NProgress.done()
-            return data;
-        }
-        const {success, errMsg} = data;
-        if (!success) {
-            if (errMsg === '用户未登录') {
-                router.push({path: '/login'})
-            } else {
-                Vue.prototype.$message.error(errMsg === undefined || errMsg === null || errMsg === '' ? '服务器异常' : errMsg);
+            if (error.response) {
+                const {status, statusText} = error.response;
+                const errorText = codeMessage[status] || statusText;
+                Vue.prototype.$message.error(errorText);
             }
+            return Promise.reject(error);
         }
-        // NProgress.done()
-        return data;
-    }, (error) => {
-        // NProgress.done()
-        if (error.response) {
-            const {status, statusText} = error.response;
-            const errorText = codeMessage[status] || statusText;
-            Vue.prototype.$message.error(errorText);
-        }
-        return Promise.reject(error);
-    });
+    )
 
-    VueAxios.axios = axios;
-    Object.defineProperties(VueAxios.prototype, {
-        $http: {
+    Vue.fly = fly;
+    Object.defineProperties(Vue.prototype, {
+        $fly: {
             get() {
-                return axios;
+                return fly;
             }
         },
-        $getUrl: {
-            get() {
-                return (url, param) => new Promise((resolve, reject) => {
-                    axios.get(url, {params: param}).then((resp) => {
-                        if (resp.success) {
-                            resolve(resp.data)
-                        } else {
-                            Vue.prototype.$message.error(resp.errMsg);
-                        }
-                    }).catch(error => {
-                        reject(error)
-                    })
-                })
-            }
-        },
-        $postUrl: {
-            get() {
-                return (url, data, useBody = false) => new Promise((resolve, reject) => {
-                    axios.post(url, useBody ? data : qs.stringify(data, {arrayFormat: 'brackets'})).then((resp) => {
-                        if (resp.success) {
-                            resolve(resp.data)
-                        } else {
-                            Vue.prototype.$message.error(resp.errMsg);
-                        }
-                    }).catch(error => {
-                        reject(error)
-                    })
-                })
-            }
-        },
-        $putUrl: {
-            get() {
-                return (url, data, useBody = false) => new Promise((resolve, reject) => {
-                    axios.put(url, useBody ? data : qs.stringify(data, {arrayFormat: 'brackets'})).then((resp) => {
-                        if (resp.success) {
-                            resolve(resp.data)
-                        } else {
-                            Vue.prototype.$message.error(resp.errMsg);
-                        }
-                    }).catch(error => {
-                        reject(error)
-                    })
-                })
-            }
-        },
-        $patchUrl: {
-            get() {
-                return (url, data) => new Promise((resolve, reject) => {
-                    axios.patch(url, qs.stringify(data, {arrayFormat: 'brackets'})).then((resp) => {
-                        if (resp.success) {
-                            resolve(resp.data)
-                        } else {
-                            Vue.prototype.$message.error(resp.errMsg);
-                        }
-                    }).catch(error => {
-                        reject(error)
-                    })
-                })
-            }
-        },
-        $deleteUrl: {
-            get() {
-                return (url, data) => new Promise((resolve, reject) => {
-                    axios.delete(url + '?' + qs.stringify(data, {arrayFormat: 'brackets'})).then((resp) => {
-                        if (resp.success) {
-                            resolve(resp.data)
-                        } else {
-                            Vue.prototype.$message.error(resp.errMsg);
-                        }
-                    }).catch(error => {
-                        reject(error)
-                    })
-                })
-            }
-        }
     });
 }
 
-Vue.use(http,axios);
+Vue.use(http,flyIo);

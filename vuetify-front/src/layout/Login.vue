@@ -41,7 +41,7 @@
 
         methods: {
             async submitBtn() {
-                const result = await this.$getUrl("/login",this.user);
+                const result = await this.$fly.get("/login",this.user);
                 console.log(result);
                 this.$router.push("/home");
             },

@@ -77,7 +77,7 @@
         },
         methods: {
             async getMyWork() {
-                const result = await this.$getUrl("/myWork");
+                const result = await this.$fly.get("/myWork");
                 var alist = new Array();
                 result.forEach(s => {
                     s.Data.forEach(d => {
@@ -95,10 +95,10 @@
                 console.log("点击行", row);
                 const url = `http://learn.open.com.cn/StudentCenter/OnLineJob/Redirect?mode=1&courseExerciseID=${row.CourseExerciseID}&submitCount=${row.SubmitCount}&studentHomeworkId=${row.studentHomeworkId}`;
                 console.log('跳转试卷页面', url);
-                const key = await this.$getUrl("/getTestPagerKey", {url: encodeURI(url)});
+                const key = await this.$fly.get("/getTestPagerKey", {url: encodeURI(url)});
                 const testPaperUrl = `http://learn.open.com.cn/StudentCenter/OnlineJob/DoHomework?courseExerciseId=${row.CourseExerciseID}&key=${key}&studentHomeworkId=${row.studentHomeworkId}&_=${(new Date()).getTime()}`;
                 console.log("请求试卷key", testPaperUrl);
-                this.paperJson = await this.$getUrl("/getTestPaper", {url: encodeURI(testPaperUrl)});
+                this.paperJson = await this.$fly.get("/getTestPaper", {url: encodeURI(testPaperUrl)});
                 console.log("获取试卷", this.paperJson);
                 // 包装 单选、多选下面的对象数组  Sections 对象下 放入 items题目对象
                 var sections = this.paperJson.TestPaperContent.Sections;

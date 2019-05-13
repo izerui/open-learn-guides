@@ -89,10 +89,10 @@
                     const s = this.sections[i];
                     for (var j = 0; j < s.items.length; j++) {
                         const q = s.items[j];
-                        const res = await this.$postUrl("/getAnswer", {
-                            itemBankId: this.paperJson.TestPaperContent.Model.P3,
-                            questionId: q.I1
-                        });
+                        var formData = new FormData;
+                        formData.append("itemBankId",this.paperJson.TestPaperContent.Model.P3);
+                        formData.append("questionId",q.I1);
+                        const res = await this.$fly.post("/getAnswer", formData);
                         res.ans = "答案: ";
                         res.Choices.forEach(ch => {
                             if (ch.IsCorrect) {
@@ -110,20 +110,20 @@
                 console.log("答案", this.qesAnswers);
             },
             async saveHomeWork() {
-                await this.$putUrl("/saveHomeWork", {
-                    homeworkID: this.paperJson.HomeworkId,
-                    homeworkAnswerId: this.paperJson.HomeworkAnswerId,
-                    answerSheet: JSON.stringify(this.answerJson),
-                });
+                var formData = new FormData;
+                formData.append("homeworkID",this.paperJson.HomeworkId);
+                formData.append("homeworkAnswerId",this.paperJson.HomeworkAnswerId);
+                formData.append("answerSheet",JSON.stringify(this.answerJson));
+                await this.$fly.put("/saveHomeWork", formData);
                 this.$message.success("保存成功,请提交作业!");
                 this.status = 'saved';
             },
             async submitHomeWork(){
-                this.$putUrl("/submitHomeWork", {
-                    homeworkID: this.paperJson.HomeworkId,
-                    homeworkAnswerId: this.paperJson.HomeworkAnswerId,
-                    answerSheet: JSON.stringify(this.answerJson),
-                }).then(res => {
+                var formData = new FormData;
+                formData.append("homeworkID",this.paperJson.HomeworkId);
+                formData.append("homeworkAnswerId",this.paperJson.HomeworkAnswerId);
+                formData.append("answerSheet",JSON.stringify(this.answerJson));
+                this.$fly.put("/submitHomeWork", formData).then(res => {
                     console.log(res);
                     this.$message.success("提交成功,本次分数:" + res.score + '分');
                     this.status = 'submited';

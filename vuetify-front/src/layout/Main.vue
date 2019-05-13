@@ -73,7 +73,7 @@
                 this.$router.push(url);
             },
             getUser() {
-                this.$getUrl('/userInfo').then((result) => {
+                this.$fly.get('/userInfo').then((result) => {
                     this.opUser = result;
                 });
             },
