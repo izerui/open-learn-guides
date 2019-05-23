@@ -4,6 +4,7 @@ import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.izerui.learn.network.NetworkReptiles;
 import com.github.izerui.learn.response.Response;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
@@ -23,7 +24,7 @@ public class LearnController {
     private NetworkReptiles network;
 
     // 登录
-    @SentinelResource("登录")
+    @ApiOperation("登录")
     @GetMapping("/login")
     public Response getUserInfo(@RequestParam("username") String username,
                                 @RequestParam("password") String password,
@@ -35,7 +36,7 @@ public class LearnController {
     }
 
     // 获取用户信息
-    @SentinelResource("获取用户信息")
+    @ApiOperation("获取用户信息")
     @GetMapping("/userInfo")
     public Response getUserInfo(@SessionAttribute(value = "opUser", required = false) String opUser) {
         if (StringUtils.isEmpty(opUser)) {
@@ -45,7 +46,7 @@ public class LearnController {
     }
 
     // 获取作业
-    @SentinelResource("获取作业")
+    @ApiOperation("获取作业")
     @GetMapping("/myWork")
     public Response myWork(@SessionAttribute(value = "opCookie", required = false) String opCookie) throws IOException {
         if (StringUtils.isEmpty(opCookie)) {
@@ -56,6 +57,7 @@ public class LearnController {
     }
 
     // 获取key
+    @ApiOperation("获取key")
     @GetMapping("/getTestPagerKey")
     public Response getKey(@RequestParam("url") String url,
                            @SessionAttribute(value = "opCookie", required = false) String opCookie) throws IOException {
