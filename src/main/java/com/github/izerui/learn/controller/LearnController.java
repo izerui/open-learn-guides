@@ -1,5 +1,6 @@
 package com.github.izerui.learn.controller;
 
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.izerui.learn.network.NetworkReptiles;
 import com.github.izerui.learn.response.Response;
@@ -22,6 +23,7 @@ public class LearnController {
     private NetworkReptiles network;
 
     // 登录
+    @SentinelResource("登录")
     @GetMapping("/login")
     public Response getUserInfo(@RequestParam("username") String username,
                                 @RequestParam("password") String password,
@@ -33,6 +35,7 @@ public class LearnController {
     }
 
     // 获取用户信息
+    @SentinelResource("获取用户信息")
     @GetMapping("/userInfo")
     public Response getUserInfo(@SessionAttribute(value = "opUser", required = false) String opUser) {
         if (StringUtils.isEmpty(opUser)) {
@@ -42,6 +45,7 @@ public class LearnController {
     }
 
     // 获取作业
+    @SentinelResource("获取作业")
     @GetMapping("/myWork")
     public Response myWork(@SessionAttribute(value = "opCookie", required = false) String opCookie) throws IOException {
         if (StringUtils.isEmpty(opCookie)) {
