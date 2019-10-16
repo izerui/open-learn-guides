@@ -1,6 +1,5 @@
 package com.github.izerui.learn.controller;
 
-import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.izerui.learn.network.NetworkReptiles;
 import com.github.izerui.learn.response.Response;
