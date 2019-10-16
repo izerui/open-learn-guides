@@ -1,6 +1,7 @@
 <template xmlns:v-slot="http://www.w3.org/1999/XSL/Transform">
     <v-layout>
         <v-data-table
+                :loading="loading"
                 :headers="headers"
                 :items="workList"
                 :pagination.sync="pagination"
@@ -34,11 +35,14 @@
 
         <!-- 试卷详情页 -->
         <v-dialog v-model="paperShow" fullscreen hide-overlay transition="dialog-bottom-transition" scrollable>
-            <TestPaper @close="paperShow=false"
+            <TestPaper
+                    ref="testPaper"
+                        @close="paperShow=false"
                        :paper-json="paperJson"
                        :sections="sections"
-                       @refresh="paperShow=false;getMyWork()"/>
+                       @refresh="refresh"/>
         </v-dialog>
+        <dialog-loader ref="dialogLoader"></dialog-loader>
     </v-layout>
 </template>
 
@@ -46,10 +50,11 @@
     // @ is an alias to /src
 
     import TestPaper from "./TestPaper";
+    import DialogLoader from "../components/DialogLoader";
 
     export default {
         name: 'home',
-        components: {TestPaper},
+        components: {TestPaper, DialogLoader},
         data() {
             return {
                 workList: [],
@@ -69,6 +74,7 @@
                     sortBy: null,
                     totalItems: null
                 },
+                loading: false,
                 sections: []
             };
         },
@@ -76,7 +82,12 @@
             this.getMyWork();
         },
         methods: {
+            refresh(){
+                this.paperShow=false;
+                this.getMyWork();
+            },
             async getMyWork() {
+                this.loading = true;
                 const result = await this.$fly.get("/myWork");
                 var alist = new Array();
                 result.forEach(s => {
@@ -88,9 +99,12 @@
                     });
                 })
                 this.workList = alist;
+                this.loading = false;
                 console.log("作业列表...", this.workList);
             },
             async gotoDoWork(row) {
+                this.$refs.testPaper.reset();
+                this.$refs.dialogLoader.show( '打开试卷...', { color: 'primary' } );
                 this.dialog = true;
                 console.log("点击行", row);
                 const url = `http://learn.open.com.cn/StudentCenter/OnLineJob/Redirect?mode=1&courseExerciseID=${row.CourseExerciseID}&submitCount=${row.SubmitCount}&studentHomeworkId=${row.studentHomeworkId}`;
@@ -116,6 +130,7 @@
                     })
                 });
                 this.sections = sections;
+                this.$refs.dialogLoader.hide();
                 console.log("包装后", this.paperJson);
                 this.paperShow = true;
             }

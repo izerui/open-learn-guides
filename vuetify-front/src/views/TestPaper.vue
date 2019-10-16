@@ -23,8 +23,9 @@
                 <v-card v-for="(qes,index) in sec.items">
                     <v-card-title primary-title>
                         <span class="title body-2">
-                            {{index+1}}. {{qes.I2}}
+                            {{index+1}}.
                         </span>
+                        <span class="title body-2" v-html="qes.I2"></span>
                         <v-spacer></v-spacer>
                         <span class="title body-2">{{index+1}}. {{qes.ans}}</span>
                     </v-card-title>
@@ -35,12 +36,15 @@
                 </v-card>
             </v-expansion-panel-content>
         </v-expansion-panel>
+        <dialog-loader ref="dialogLoader"></dialog-loader>
     </v-card>
 </template>
 
 <script>
+    import DialogLoader from "../components/DialogLoader";
     export default {
         name: "TestPaper",
+        components: {DialogLoader},
         props: {
             paperJson: {
                 type: Object,
@@ -83,7 +87,12 @@
         created(){
         },
         methods:{
+            reset(){
+              this.qesAnswers = [];
+              this.status = 'unknown';
+            },
             async getAnswers() {
+                this.$refs.dialogLoader.show( '获取答案...', { color: 'primary' } );
                 this.status = 'geting';
                 for (var i = 0; i < this.sections.length; i++) {
                     const s = this.sections[i];
@@ -107,9 +116,11 @@
                     }
                 }
                 this.status = 'done';
+                this.$refs.dialogLoader.hide();
                 console.log("答案", this.qesAnswers);
             },
             async saveHomeWork() {
+                this.$refs.dialogLoader.show( '保存答案...', { color: 'primary' } );
                 var formData = new FormData;
                 formData.append("homeworkID",this.paperJson.HomeworkId);
                 formData.append("homeworkAnswerId",this.paperJson.HomeworkAnswerId);
@@ -117,8 +128,10 @@
                 await this.$fly.put("/saveHomeWork", formData);
                 this.$message.success("保存成功,请提交作业!");
                 this.status = 'saved';
+                this.$refs.dialogLoader.hide();
             },
             async submitHomeWork(){
+                this.$refs.dialogLoader.show( '提交答案...', { color: 'primary' } );
                 var formData = new FormData;
                 formData.append("homeworkID",this.paperJson.HomeworkId);
                 formData.append("homeworkAnswerId",this.paperJson.HomeworkAnswerId);
@@ -128,6 +141,7 @@
                     this.$message.success("提交成功,本次分数:" + res.score + '分');
                     this.status = 'submited';
                     this.$emit("refresh");
+                    this.$refs.dialogLoader.hide();
                 })
             }
         }

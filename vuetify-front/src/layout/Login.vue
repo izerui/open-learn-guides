@@ -23,11 +23,14 @@
                 </v-layout>
             </v-container>
         </v-content>
+        <dialog-loader ref="dialogLoader"></dialog-loader>
     </v-app>
 </template>
 
 <script>
+    import DialogLoader from "../components/DialogLoader";
     export default {
+        components: {DialogLoader},
         data() {
             return {
                 user: {
@@ -41,9 +44,15 @@
 
         methods: {
             async submitBtn() {
-                const result = await this.$fly.get("/login",this.user);
-                console.log(result);
-                this.$router.push("/home");
+                if(this.user && this.user.username && this.user.password){
+                    this.$refs.dialogLoader.show( '登陆中...', { color: 'primary' } );
+                    const result = await this.$fly.get("/login",this.user);
+                    console.log(result);
+                    this.$refs.dialogLoader.hide();
+                    this.$router.push("/home");
+                } else {
+                    this.$refs.dialogLoader.showSnackbar( '请输入账号密码!', { color: 'error' } )
+                }
             },
         },
     }
