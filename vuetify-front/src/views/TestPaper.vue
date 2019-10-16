@@ -131,7 +131,7 @@
                 this.$refs.dialogLoader.hide();
             },
             async submitHomeWork(){
-                this.$refs.dialogLoader.show( '提交答案...', { color: 'primary' } );
+                this.$refs.dialogLoader.show( '提交作业...', { color: 'primary' } );
                 var formData = new FormData;
                 formData.append("homeworkID",this.paperJson.HomeworkId);
                 formData.append("homeworkAnswerId",this.paperJson.HomeworkAnswerId);
