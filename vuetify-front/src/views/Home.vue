@@ -89,8 +89,9 @@
             async getMyWork() {
                 this.loading = true;
                 const result = await this.$fly.get("/myWork");
+                console.log(result)
                 var alist = new Array();
-                result.forEach(s => {
+                result.listWork.forEach(s => {
                     s.Data.forEach(d => {
                         d.Count = s.Count;
                         d.CourseName = s.CourseName;
